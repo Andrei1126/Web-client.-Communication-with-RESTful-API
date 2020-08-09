@@ -1,0 +1,63 @@
+Micut Andrei-Ion
+Grupa 321 CB
+
+						~Tema 3 Client Web. Comunicare cu Rest API~
+
+
+Introducere:
+	
+		In aceasta tema, am reusit sa realizez implementarea inregistrarii unui client cu ajutorul unui nume de utilizator si a unei parole (iar in cazul in care numele de utilizator este luat de altcineva intoarcem eroare), logarea clientului cu ajutorul credentialelor fixate anterior, la register, unde in urma logarii mi se va intoarce un cookie ce va trebui prelucrat pentru a extrage continutul sau (in cazul in care credentialele nu se potrivesc, se va intoarce eroare din parte server-ului). Dupa ce am reusit sa ma loghez si am primit cookie-ul corect, va trebui sa intru in biblioteca cu ajutorul acestui cookie si mi se va intoarce un token JWT daca totul decurge bine (daca credentialele nu sunt bune, adica daca autentificarea a esuat - daca cookie nu e bun - atunci server-ul va intoarce mesaj de eroare), apoi, am reusit sa pot vizualiza cartile ce au fost introduse (sub forma de ""id": Number, "title": String") pentru un anumit client (pentru a putea vedea cartile user-ului, trebuie ca token-ul primit sa fie corect, altfel se va primi mesaj de eroare, deoarece user-ul nu are acces la biblioteca). Apoi, am reusit sa vizualizez detaliile despre o carte anume cu id-ul "id", acest lucru fiind posibil doar daca demonstrez ca am acces la biblioteca (prin intermediul token-ului primit in urma autentificarii), iar in caz contrar server-ul va intoarce mesaj de eroare pentru ca nu am avut acces la biblioteca (token incorect) sau se va intoarce mesaj daca id-ul cartii pe care o cautam nu e unul valid. Am reusit sa adaug cu succes o carte in biblioteca, insa pentru a reusi sa realizez acest lucru am avut nevoie de acces la biblioteca (prin intermediul token-ului primit de la autentificare), iar in caz contrar server a intors eroare, deoarece nu s-a reusit accesul in biblioteca sau nu s-a respectat formatarea ceruta. Apoi am realizat stergerea unei carti din biblioteca pe baza id-ului sau (acest lucru a putut fi realizat doar daca avem acces in biblioteca - datorita token-ului - , iar server-ul va intoarce eroare daca nu am reusit sau daca id-ul este unul invalid). Logout-ul va fi realizat doar daca am reusit sa ne autentificam, altfel se va intoarce eroare ca nu suntem autentificati. Apoi, trebuie sa "uitam" (free) cookie-ul si token-ul primite pentru ca dupa delogare sa nu se mai poata realiza actiuni. (Ex.: de afisare a tuturor cartilor, de afisare a detaliilor unei carti s.a.m.d.). La final, vom iesi din program cand se va intalni comanda "exit".
+
+	Implementare:
+
+		Punctul de pornire al acestei teme a fost laboratorul 10 - Protocolul HTTP.
+
+	Main:
+
+		Mi-am definit variabile ce ma vor ajuta pe parcursul temei, printre care: comanda, username-ul, parola, detaliile referitoare la o carte s.a.m.d. Am aloat spatiu pentru fiecare variabila declarata dinamic, am retinut ruta de acces , am deschis conexiunea cu ajutorul functiei open_connection, mi-am alocat un vector de string-uri de dimensiune 2 in care imi voi retine username-ul si password-ul. Voi continua sa primesc comenzi pana cand se va intalni comanda "exit". 
+
+		Mai intai, se va primi comanda "register", unde ne vom inregistra numele de utilizator si parola, insa vom primi eroare daca exista deja. Se va redeschide, din nou, conexiunea, programul primeste username-ul si pawssword-ul citite de la tastatura, se retin credentialele primite si mesajul trimis de catre tester server-ului prin intermediul functiei "register_user", respectiv compute_post_request_user, se afiseaza mesajul ce va fi trimis server-ului in format json, primesc raspunsul de la server, iar apoi afisez raspunsul server-ului. 
+
+		In cazul in care se va primi comanda "login", se va redeschide conexiunea, se primesc, din nou, username-ul si password-ul, iar apoi retin cookie-ul intors de functia login. In functia "login" voi retine credentialele utilizatorului, realizez formatul json cu, credentialele retinute mai devreme, realizez mesajul trimis de catre tester server-ului, afisez ceea ce ii trimit eu server-ului si primesc raspunsul de la server. Apoi, realizez despartirea mesajului primit de la server, iar pentru a putea lua cookie-ul am folosit ca delimitator "\r\n" si am cautat in mesajul trimis de server pana cand primele 11 caractere sunt "Set-Cookie:", apoi m-am deplasat 12 carctere mai la dreapta pentru a putea lua doar continutul cookie-ului. Am folosit un ok pentru a nu mai putea sa ne logam in cazul in care suntem deja logati, ci dupa ce s-a dat comanda "logout".
+
+		Daca programul pprimeste comanda "enter_library", redeschid conexiunea si retin token-ul intors de functia enter_library. Functia "enter_library" imi va realiza intrarea in biblioteca pe baza cookie-ului rezultat in urma autentificarii si imi va rezulta, la randul sau, un mesaj de unde va trebui ales doar token-ul. Pentru a putea returna doar token-ul am procedat asemanator pentru cookie, doar ca de aceasta data a trebuit sa caut string-ul care incepe cu "{"token":"", iar informatia cautat se afla la 10 caractere dupa aceasta. Mai apoi, am retinut continutul token-ului fara caracterele ""}". Am folosit un ok pentru a nu mai putea sa dam comanda "enter_library" daca ne aflam deja in biblioteca, ci dupa ce am iesit din ea.
+
+		Daca programul primeste comanda "get_books", atunci va fi apelata functia cu acelasi nume. Functia imi va returna o liste de liste de forma ""id": Number, "title": String". Redeschid conexiunea si urmez, in continuare, aceeasi pasi ca mai sus.
+
+		Daca programul primeste comanda "get_book", atunci se va apela functia cu acelasi nume. Functia imi va returna detaliile referitoare la o carte doar daca id-ul introdus este unul corect, iar token-ul de intrare in biblioteca este, de asemenea, corect. Voi retine id-ul pe care il citesc, apoi il concatenez la ruta de acces "/api/v1/tema/library/books/" si continui cu aceeasi pasi ca mai devreme.
+
+		Daca programul primeste comanda "add_book", atunci se va apela functia cu acelasi nume. Functia imi va adauga o carte in biblioteca, doar daca am reusit sa intram in aceasta (cu ajutorul token-ului) sau daca daca informatiile referitoare la carte sunt complete sau respecta formatarea. Informatiile citite de la tastatura vor fi retinute intr-un vector de string-uri care, ulterior, va fi alocat dinamic. In continuare, continui cu pasii de mai sus.		
+
+		Daca rogramul primeste comanda "delete_book", atunci se va apela functia cu acelasi nume. In aceasta functie se va realiza stergerea unei carti pe baza id-ului primit daca id-ul este unul valid sau daca ne aflam in biblioteca. Voi citiun id pe care il concatenez la ruta de acces "/api/v1/tema/library/books/" si continui functia la fel ca in cazul celorlalte.
+
+		In cazul in care se primeste comanda "logout", atunci se va apela functia cu acelasi nume. Functia imi realizeaza delogarea doar daca cookie-ul pe care il primesc in urma autentificarii este unul valid. Mai apoi, va trebui sa "uit" cookie-ul si token-ul dobandite anterior. 
+
+		In cazul in care primesc comanda "exit", atunci se va apela functia "exit_from_program" ce ma va scoate din rularea programului.
+
+		La final, realizez dezalocarea.
+
+		Am avut grija sa nu se produca comenzi ilegale. (Ex.:login -> add_book sau login -> delete_book). Pentru acest lucru am folosit ok-uri astfel:
+		-> ok_login nu va permite sa ma loghez din nou daca sunt deja logat si imi va intoarce mesaj corespunzator sau sa ma inregistrez, deoarece nu consider ca noi suntem adminii.
+		-> ok_enter nu imi va permite sa folosesc niciuna din functiile add_book, get_books, get_book, delete_book, deoarece nu am dovedit ca am permisiunea de a intra in biblioteca.
+
+		Dupa cum am scris si in comentariul pentru afisarii mesajului aferent nedovedirea permisiunii in cazul comenzilor get_book si delete_book, am scris numarul 28, deoarece imi afisa aCommand, in loc de Command pentru urmatoarea comanda ce va urma.
+
+
+	Request:
+
+		Acest fisier este preluat din laborator. Am adaugat functia compute_get_request_book, unde am adaugat in header-ul Authorization Bearer token-ul. Am mai adaugat functia coompute_delete_book, punand in header in loc de GET, DELETE si tot in header, in Authorization Bearer, token-ul. Functiile compute_post_request_user si compute_post_request_book imi vor realiza prelucr informatiilor trimise, acestea fiind puse in format json.
+
+
+
+	Biblioteca JSON:
+
+		(Din parson.c)
+		JSON_Value *root_value = json_value_init_object();
+    	JSON_Object *root_object = json_value_get_object(root_value);
+    	char *serialized_string = NULL;
+    	json_object_set_string
+    	serialized_string = json_serialize_to_string_pretty(root_value);
+    	json_free_serialized_string(serialized_string);
+    	json_value_free(root_value);
+
+		Am ales folosirea urmatoarelor, deoarece este mult mai usor sa folosim aceste functii decat sa cream noi de mana formatul de tipul json, fiind si nu greu de inteles. Pentru a crea un obiect de tipul json voi avea nevoie sa declar obiectul, valoarea si string-ul in care sa retin ceea ce primesc, pentru a forma obiectul propriu zis de tipul json pe care il voi retine in serialized_string. Ultimele 2 comenzi le-am folosit pentru a dezaloc serialized_string si root_value.
